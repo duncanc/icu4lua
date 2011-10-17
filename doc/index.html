@@ -1,0 +1,1306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>ICU4Lua Manual</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<style type='text/css'>
+			body {
+				font-family: sans-serif;
+				font-size: 90%;
+			}
+			h1, h2, h3 {
+				padding: 0;
+				margin: 0;
+			}
+			ul {
+				margin-top: 0;
+				margin-bottom: 0;
+			}
+			.stringfunc {
+				font-weight: bold;
+			}
+			.equivalent {
+				font-size: 90%;
+				font-style: italic;
+			}
+			tt {
+				font-size: 125%;
+			}
+			.code {
+				font-weight: bold;
+				padding: 1px;
+				background: #eeeeee;
+			}
+			hr {
+				border: 0;
+				background: #dddddd;
+			}
+			a {
+				text-decoration: none;
+			}
+			a.external {
+				font-weight: bold;
+			}
+			a:hover {
+				text-decoration: underline;
+			}
+			.note {
+				font-weight: bold;
+				font-variant: small-caps;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>ICU4Lua</h1>
+		<hr />
+		<h2>Contents</h2>
+		<ul>
+			<li>
+				<a href="#icu">icu</a>
+				<br />
+				The root ICU module. This is currently quite sparse, most functionality is
+				in the submodules.
+			</li>
+			<li>
+				<a href="#icu.ustring">icu.ustring</a>
+				<br />
+				Utility functions for encoding, decoding and manipulating <i>ustrings</i>,
+				a Unicode-friendly alternative string data type to regular Lua strings.
+				Provides a full equivalent set of functions to Lua's standard string table.
+			</li>
+			<li>
+				<a href="#icu.utf8">icu.utf8</a>
+				<br />
+				Utility functions for dealing with UTF-8 encoded text in standard Lua strings.
+				Provides a full equivalent set of functions to Lua's standard string table.
+			</li>
+			<li>
+				<a href="#icu.collator">icu.collator</a>
+				<br />
+				 for some of ICU's locale-sensitive collation facilities.
+			</li>
+			<li>
+				<a href="#icu.regex">icu.regex</a>
+				<br />
+				Lua wrapper for ICU's regular expressions library.
+			</li>
+			<li>
+				<a href="#icu.stringprep">icu.stringprep</a>
+				<br />
+				ICU's implementation of the StringPrep algorithm.
+			</li>
+			<li>
+				<a href="#icu.idna">icu.idna</a>
+				<br />
+				ICU's utilities for dealing with International Domain Names for Applications.
+			</li>
+			<li>
+				<a href="#icu.ufile">icu.ufile</a>
+				<br />
+				Read and write ustrings to/from files in arbitrary text encoding.
+			</li>
+			<li>
+				<a href="#icu.normalizer">icu.normalizer</a>
+				<br />
+				Utilities for Unicode normalization.
+			</li>
+		</ul>
+		<hr />
+		<div id="icu._VERSION">
+			<h3>icu._VERSION</h3>
+			<p>
+				The ICU version number, as a string.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.defaultencoding">
+			<h3>icu.defaultencoding ()</h3>
+			<p>
+				Returns the name of the default text encoding of the process/application.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.convert">
+			<h3>icu.convert (text, current_encoding, new_encoding)</h3>
+			<p>
+				Convert a Lua string, <b>text</b>, from one encoding (<b>current_encoding</b>) to another (<b>new_encoding</b>).
+			</p>
+			<p>
+				If either of the encoding parameters are passed as <tt class='code'>nil</tt>, the default encoding is used for that end of the conversion.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.ustring">
+			<h2>icu.ustring</h2>
+			<p>
+				"Ustrings" are an alternative type of text string data to standard Lua strings.
+				Internally, a ustring is an array of ICU UChars, stored in a "userdata" structure.
+				The <tt>icu.ustring</tt> submodule provides ways to convert ustrings to and from standard Lua strings, and to do the same things
+				on a ustring that you can on a Lua string.
+			</p>
+			<p>
+				Since ustrings and Lua strings are fundamentally different types, if you try to compare a ustring to a Lua string using the <tt class='code'>==</tt> equality
+				operator, the result will always be <tt class='code'>false</tt>, and if you try to compare them using the less-than/greater-than operators,
+				Lua will throw an error. Ustrings can only be compared to other ustrings.
+			</p>
+			<p>
+				Using <tt class='code'>icu.ustring(...)</tt> as a function is the same as calling <tt class='code'>icu.ustring.decode(...)</tt>.
+				A recommended convention for this is:
+				<pre class='code'>
+local U = require 'icu.ustring'
+
+local ustr = U"Hello World!"
+</pre>
+			</p>
+			<p>
+				This is the full list of functions provided by <tt>icu.ustring</tt>.
+				They can also be called as methods on a ustring instance. Functions in <b>bold</b> are intended to be directly
+				equivalent to a function in the standard
+				<tt>string</tt> library.
+			</p>
+			<ul>
+				<li><a href='#icu.ustring.decode'>icu.ustring.decode</a></li>
+				<li><a href='#icu.ustring.encode'>icu.ustring.encode</a></li>
+				<li><a href='#icu.ustring.lessthan'>icu.ustring.lessthan</a></li>
+				<li><a href='#icu.ustring.lessorequal'>icu.ustring.lessorequal</a></li>
+				<li><a href='#icu.ustring.unescape'>icu.ustring.unescape</a></li>
+				<li><a href='#icu.ustring.isustring'>icu.ustring.isustring</a></li>
+				<li><a class='stringfunc' href='#icu.ustring.codepoint'>icu.ustring.codepoint</a></li>
+				<li><a class='stringfunc' href='#icu.ustring.char'>icu.ustring.char</a></li>
+				<li><a class='stringfunc' href='#icu.ustring.len'>icu.ustring.len</a></li>
+				<li><a class='stringfunc' href='#icu.ustring.rep'>icu.ustring.rep</a></li>
+				<li><a class='stringfunc' href='#icu.ustring.sub'>icu.ustring.sub</a></li>
+				<li><a class='stringfunc' href='#icu.ustring.reverse'>icu.ustring.reverse</a></li>
+				<li><a class='stringfunc' href='#icu.ustring.lower'>icu.ustring.lower</a></li>
+				<li><a class='stringfunc' href='#icu.ustring.upper'>icu.ustring.upper</a></li>
+				<li><a class='stringfunc' href='#icu.ustring.match'>icu.ustring.match</a></li>
+				<li><a class='stringfunc' href='#icu.ustring.find'>icu.ustring.find</a></li>
+				<li><a class='stringfunc' href='#icu.ustring.gmatch'>icu.ustring.gmatch</a></li>
+				<li><a class='stringfunc' href='#icu.ustring.gsub'>icu.ustring.gsub</a></li>
+				<li><a class='stringfunc' href='#icu.ustring.format'>icu.ustring.format</a></li>
+				<li><a href='#icu.ustring.empty'>icu.ustring.empty</a></li>
+			</ul>
+		</div>
+		<hr/>
+		<div id='icu.ustring.decode'>
+			<h3>icu.ustring.decode (str[, encoding])</h3>
+			<p>
+				Create a new ustring containing the text encoded in Lua string <b>s</b>, using the encoding specified by <b>encoding</b>
+				(as a Lua string, for example <tt class='code'>'windows-1252'</tt>)
+				or UTF-8 by default.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.encode'>
+			<h3>icu.ustring.encode (ustr[, encoding])</h3>
+			<p>
+				Encode the text in the given ustring <b>ustr</b> into a Lua string, using the encoding specified by <b>encoding</b>
+				or UTF-8 by default.
+			</p>
+			<p>
+				<span class='note'>Note: </span>
+				Calling the standard Lua function <a href='http://www.lua.org/manual/5.1/manual.html#pdf-tostring'><tt>tostring</tt></a>
+				on a ustring will internally call <tt>encode</tt> with no encoding specified, so the result will be UTF-8 encoded.
+				Also, <a href='http://www.lua.org/manual/5.1/manual.html#pdf-print'><tt>print</tt></a>
+				uses <a href='http://www.lua.org/manual/5.1/manual.html#pdf-tostring'><tt>tostring</tt></a> internally,
+				so printing a ustring will write it UTF-8 encoded to the output.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.lessthan'>
+			<h3>icu.ustring.lessthan (a, b)</h3>
+			<p>
+				Returns <tt>true</tt> if ustring <tt>a</tt> is less than <tt>b</tt> in a codepoint-wise comparison, <tt>false</tt> otherwise.
+			</p>
+			<p>
+				You can also use <tt>a &lt; b</tt> instead.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.lessorequal'>
+			<h3>icu.ustring.lessorequal (a, b)</h3>
+			<p>
+				Returns <tt>true</tt> if ustring <tt>a</tt> is less than or equal to <tt>b</tt> in a codepoint-wise comparison, <tt>false</tt> otherwise.
+			</p>
+			<p>
+				You can also use <tt>a &lt;= b</tt> instead.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.unescape'>
+			<h3>icu.ustring.unescape (str)</h3>
+			<p>
+				Similar to <a href='#icu.ustring.decode'><tt>icu.ustring.decode</tt></a>, except that <tt>unescape</tt> does its own run-time backslash-escaping, and supports
+				escapes that Lua normally doesn't such as <tt class='code'>\x3F</tt> and <tt class='code'>\u0030</tt> for specifying characters using a hexadecimal value.
+				The rest of the text is expected to be encoded by the default codepage.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.isustring'>
+			<h3>icu.ustring.isustring (v)</h3>
+			<p>
+				Returns <tt>true</tt> if the given value <tt>v</tt> is a ustring, <tt>false</tt> otherwise.
+				(This function is necessary as the Lua function <a href='http://www.lua.org/manual/5.1/manual.html#pdf-type'><tt>type(v)</tt></a>
+				will always return <tt>'userdata'</tt> for a ustring.)
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.codepoint'>
+			<h3>icu.ustring.codepoint (ustr[, i[, j]])</h3>
+			<p>
+				The ustring equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.byte'><tt>string.byte</tt></a>
+				(renamed to be more correct).
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.char'>
+			<h3>icu.ustring.char (...)</h3>
+			<p>
+				The ustring equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.char'><tt>string.char</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.len'>
+			<h3>icu.ustring.len (ustr)</h3>
+			<p>
+				The ustring equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.len'><tt>string.len</tt></a>.
+				Using the length operator <tt>#</tt> on a ustring will also work.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.rep'>
+			<h3>icu.ustring.rep (ustr, n)</h3>
+			<p>
+				The ustring equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.rep'><tt>string.rep</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.sub'>
+			<h3>icu.ustring.sub (ustr, i[, j])</h3>
+			<p>
+				The ustring equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.sub'><tt>string.sub</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.reverse'>
+			<h3>icu.ustring.reverse (ustr)</h3>
+			<p>
+				The ustring equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.reverse'><tt>string.reverse</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.lower'>
+			<h3>icu.ustring.lower (ustr)</h3>
+			<p>
+				The ustring equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.lower'><tt>string.lower</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.upper'>
+			<h3>icu.ustring.upper (ustr)</h3>
+			<p>
+				The ustring equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.upper'><tt>string.upper</tt></a>.
+			</p>
+		</div>
+		<hr />
+		<div id='icu.ustring.match'>
+			<h3>icu.ustring.match (ustr, patt[, start_index])</h3>
+			<p>
+				The ustring equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.match'><tt>string.match</tt></a>.
+			</p>
+			<p>
+				The character classes used when matching are, by default, still only the ASCII set. For example,
+				<tt class='code'>%a</tt> is still only equivalent to <tt class='code'>[A-Za-z]</tt>. To use the
+				full Unicode-set character classes, there is a new syntax specific to ICU4Lua.
+				Add an exclamation mark <tt class='code'>!</tt> after <tt class='code'>%</tt>,
+				in this example <tt class='code'>%!a</tt> to match the
+				set of all "letter" characters defined in Unicode.
+			</p>
+		</div>
+		<hr />
+		<div id='icu.ustring.find'>
+			<h3>icu.ustring.find (ustr, patt[, start_index])</h3>
+			<p>
+				The ustring equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.find'><tt>string.find</tt></a>,
+				with the difference to character classes described in the documentation for <a href='#icu.ustring.match'><tt>icu.ustring.match</tt></a>.
+			</p>
+		</div>
+		<hr />
+		<div id='icu.ustring.gmatch'>
+			<h3>icu.ustring.gmatch (ustr, patt)</h3>
+			<p>
+				The ustring equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.gmatch'><tt>string.gmatch</tt></a>,
+				with the difference to character classes described in the documentation for <a href='#icu.ustring.match'><tt>icu.ustring.match</tt></a>.
+			</p>
+		</div>
+		<hr />
+		<div id='icu.ustring.gsub'>
+			<h3>icu.ustring.gsub (ustr, patt, replacement[, n])</h3>
+			<p>
+				The ustring equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.gsub'><tt>string.gsub</tt></a>,
+				with the difference to character classes described in the documentation for <a href='#icu.ustring.match'><tt>icu.ustring.match</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.format'>
+			<h3>icu.ustring.format (ustr, ...)</h3>
+			<p>
+				The ustring equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.format'><tt>string.format</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.ustring.empty'>
+			<h3>icu.ustring.empty</h3>
+			<p>
+				A constant value holding the zero-length ustring.
+			</p>
+		</div>
+		<hr/>
+		<div>
+			<h2>icu.utf8</h2>
+			<p>
+				If switching to using ustrings seems like a radical change and you'd rather stay in the domain of standard Lua strings,
+				you might find the <tt>icu.utf8</tt> submodule useful.
+				It is like a copy of all of the functions in
+				<tt>icu.ustring</tt> where every Lua string input parameter is decoded as UTF-8 into a ustring,
+				and every ustring return value is encoded into a UTF-8 Lua string.
+			</p>
+			<p>
+				As in <tt>icu.ustring</tt>, functions in <b>bold</b> are intended to be directly
+				equivalent to a function in the standard
+				<tt>string</tt> library.
+			</p>
+			<ul>
+				<li><a href='#icu.ustring.unescape'>icu.utf8.unescape</a></li>
+				<li><a href='#icu.ustring.unescape'>icu.utf8.lessthan</a></li>
+				<li><a href='#icu.ustring.unescape'>icu.utf8.lessorequal</a></li>
+				<li><a class='stringfunc' href='#icu.utf8.codepoint'>icu.utf8.codepoint</a></li>
+				<li><a class='stringfunc' href='#icu.utf8.char'>icu.utf8.char</a></li>
+				<li><a class='stringfunc' href='#icu.utf8.len'>icu.utf8.len</a></li>
+				<li><a class='stringfunc' href='#icu.utf8.rep'>icu.utf8.rep</a></li>
+				<li><a class='stringfunc' href='#icu.utf8.sub'>icu.utf8.sub</a></li>
+				<li><a class='stringfunc' href='#icu.utf8.reverse'>icu.utf8.reverse</a></li>
+				<li><a class='stringfunc' href='#icu.utf8.upper'>icu.utf8.upper</a></li>
+				<li><a class='stringfunc' href='#icu.utf8.lower'>icu.utf8.lower</a></li>
+				<li><a class='stringfunc' href='#icu.utf8.match'>icu.utf8.match</a></li>
+				<li><a class='stringfunc' href='#icu.utf8.find'>icu.utf8.find</a></li>
+				<li><a class='stringfunc' href='#icu.utf8.gmatch'>icu.utf8.gmatch</a></li>
+				<li><a class='stringfunc' href='#icu.utf8.gsub'>icu.utf8.gsub</a></li>
+				<li><a class='stringfunc' href='#icu.utf8.format'>icu.utf8.format</a></li>
+				<li><a href='#icu.utf8.bom'>icu.utf8.bom</a></li>
+			</ul>
+		</div>
+		<hr/>
+		<div id='icu.utf8.unescape'>
+			<h3>icu.utf8.unescape (str)</h3>
+			<p>
+				Create a UTF-8 string using run-time backslash-escaping. This includes support for
+				escapes that Lua normally doesn't allow, such as <tt>\x3F</tt> and <tt>\u0030</tt> for specifying characters using a hexadecimal value.
+				The rest of the text is expected to be encoded by the default codepage.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.utf8.lessthan'>
+			<h3>icu.utf8.lessthan (a, b)</h3>
+			<p>
+				Returns <tt class='code'>true</tt> if UTF-8 encoded Lua string <b>a</b> is less than <b>b</b> in a codepoint-wise comparison, <tt class='code'>false</tt> otherwise.
+			</p>
+			<p>
+				You can use this function as the second parameter of the standard Lua function <tt>table.sort</tt> to sort an array of UTF-8 encoded strings.
+			</p>
+			<p>
+				(There's no equivalent function for <tt class='code'>a &gt;= b</tt> - use <tt class='code'>not icu.utf8.lessthan(a,b)</tt> instead.)
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.utf8.lessorequal'>
+			<h3>icu.utf8.lessorequal (a, b)</h3>
+			<p>
+				Returns <tt>true</tt> if UTF-8 string <tt>a</tt> is less than or equal to <tt>b</tt> in a codepoint-wise comparison, <tt>false</tt> otherwise.
+			</p>
+			<p>
+				(There's no equivalent function for <tt>a &gt; b</tt> - use <tt>not icu.utf8.lessorequal(a,b)</tt> instead.)
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.utf8.codepoint'>
+			<h3>icu.utf8.codepoint (s[, i[, j]])</h3>
+			<p>
+				The UTF-8 equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.byte'><tt>string.byte</tt></a>
+				(renamed to be more correct).
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.utf8.char'>
+			<h3>icu.utf8.char (...)</h3>
+			<p>
+				The UTF-8 equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.char'><tt>string.char</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.utf8.len'>
+			<h3>icu.utf8.len (s)</h3>
+			<p>
+				The UTF-8 equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.len'><tt>string.len</tt></a>.
+				Using the length operator <tt>#</tt> on a utf8 will also work.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.utf8.rep'>
+			<h3>icu.utf8.rep (s, n)</h3>
+			<p>
+				The UTF-8 equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.rep'><tt>string.rep</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.utf8.sub'>
+			<h3>icu.utf8.sub (s, i[, j])</h3>
+			<p>
+				The UTF-8 equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.sub'><tt>string.sub</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.utf8.reverse'>
+			<h3>icu.utf8.reverse (s)</h3>
+			<p>
+				The UTF-8 equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.reverse'><tt>string.reverse</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.utf8.lower'>
+			<h3>icu.utf8.lower (s)</h3>
+			<p>
+				The UTF-8 equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.lower'><tt>string.lower</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.utf8.upper'>
+			<h3>icu.utf8.upper (s)</h3>
+			<p>
+				The UTF-8 equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.upper'><tt>string.upper</tt></a>.
+			</p>
+		</div>
+		<hr />
+		<div id='icu.utf8.match'>
+			<h3>icu.utf8.match (ustr, patt[, start_index])</h3>
+			<p>
+				The UTF-8 equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.match'><tt>string.match</tt></a>,
+				with the difference to character classes described in the documentation for <a href='#icu.ustring.match'><tt>icu.ustring.match</tt></a>.
+			</p>
+		</div>
+		<hr />
+		<div id='icu.utf8.find'>
+			<h3>icu.utf8.find (ustr, patt[, start_index])</h3>
+			<p>
+				The UTF-8 equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.find'><tt>string.find</tt></a>,
+				with the difference to character classes described in the documentation for <a href='#icu.ustring.match'><tt>icu.ustring.match</tt></a>.
+			</p>
+		</div>
+		<hr />
+		<div id='icu.utf8.gmatch'>
+			<h3>icu.utf8.gmatch (ustr, patt)</h3>
+			<p>
+				The UTF-8 equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.gmatch'><tt>string.gmatch</tt></a>,
+				with the difference to character classes described in the documentation for <a href='#icu.ustring.match'><tt>icu.ustring.match</tt></a>.
+			</p>
+		</div>
+		<hr />
+		<div id='icu.utf8.gsub'>
+			<h3>icu.utf8.gsub (ustr, patt, replacement[, n])</h3>
+			<p>
+				The UTF-8 equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.gsub'><tt>string.gsub</tt></a>,
+				with the difference to character classes described in the documentation for <a href='#icu.ustring.match'><tt>icu.ustring.match</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.utf8.format'>
+			<h3>icu.utf8.format (ustr, ...)</h3>
+			<p>
+				The UTF-8 equivalent to
+				<a href='http://www.lua.org/manual/5.1/manual.html#pdf-string.format'><tt>string.format</tt></a>.
+			</p>
+		</div>
+		<hr/>
+		<div id='icu.utf8.bom'>
+			<h3>icu.utf8.bom</h3>
+			<p>
+				A string containing the (so-called) UTF-8 byte order mark.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.collator">
+			<h2>icu.collator</h2>
+			<ul>
+				<li><a href='#icu.collator.open'>icu.collator.open</a></li>
+				<li><a href='#icu.collator.strength'>icu.collator.strength</a></li>
+				<li><a href='#icu.collator.equals'>icu.collator.equals</a></li>
+				<li><a href='#icu.collator.lessthan'>icu.collator.lessthan</a></li>
+				<li><a href='#icu.collator.lessorequal'>icu.collator.lessorequal</a></li>
+			</ul>
+		</div>
+		<hr />
+		<div id="icu.collator.open">
+			<h3>icu.collator.open (locale)</h3>
+			<p>
+				Open a collator for the given locale, which must be given as a Lua string,
+				not a ustring. If the collator could not be opened, returns <tt class='code'>nil</tt> and an
+				error message.
+			</p>
+			<p>
+				<span class='note'>Note: </span>
+				You can also call <tt>icu.collator(...)</tt> instead of <tt>icu.collator.open(...)</tt>
+			</p>
+		</div>
+		<hr />
+		<div id='icu.collator.strength'>
+			<h3>icu.collator.strength (col[, new_value])</h3>
+			<p>
+			Either sets the strength of the collator, or returns the current strength
+			  setting if no new value is given. (If a new value is set, the collator
+			  itself is returned.)
+			</p>
+			<p>
+				Valid strength values are:
+			</p>
+			<ul>
+				<li><tt>icu.collator.PRIMARY</tt></li>
+				<li><tt>icu.collator.SECONDARY</tt></li>
+				<li><tt>icu.collator.TERTIARY</tt></li>
+				<li><tt>icu.collator.QUATERNARY</tt></li>
+				<li><tt>icu.collator.IDENTICAL</tt></li>
+				<li><tt>icu.collator.DEFAULT_STRENGTH</tt></li>
+			</ul>
+		</div>
+		<hr />
+		<div id='icu.collator.equals'>
+			<h3>icu.collator.equals (col, a, b)</h3>
+			<p>
+				Returns <tt class='code'>true</tt> if ustring <b>a</b> is equal to ustring <b>b</b> according to the collator <b>col</b>,
+				<tt class='code'>false</tt> otherwise.
+			</p>
+		</div>
+		<hr />
+		<div id='icu.collator.lessthan'>
+			<h3>icu.collator.lessthan (col, a, b)</h3>
+			<p>
+				Returns <tt class='code'>true</tt> if ustring <b>a</b> is less than ustring <b>b</b> according to the collator <b>col</b>,
+				<tt class='code'>false</tt> otherwise.
+			</p>
+		</div>
+		<hr />
+		<div id='icu.collator.lessorequal'>
+			<h3>icu.collator.lessorequal (col, a, b)</h3>
+			<p>
+				Returns <tt class='code'>true</tt> if ustring <b>a</b> is less than or equal to ustring <b>b</b> according to the collator <b>col</b>,
+				<tt class='code'>false</tt> otherwise.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.regex">
+			<h2>icu.regex</h2>
+			<p>
+				For details on the pattern syntax supported by ICU's regular expressions engine, see the ICU User Guide page at
+				<a class="external" href="http://userguide.icu-project.org/strings/regexp/">http://userguide.icu-project.org/strings/regexp/</a>.			
+			</p>
+			<p>
+				There are two "levels" of functions available in <tt>icu.regex</tt>:
+			</p>
+			<ol>
+				<li>
+					<p>
+						A high-level set of "full" operations that people who have used regular expressions are likely to be familiar with -
+						find the first match
+						if any (<tt>match</tt>), iterate through all matches (<tt>gmatch</tt>), replace all matches (<tt>replace</tt>)
+						and split on each match (<tt>split</tt>).
+					</p>
+					<p>
+						For these functions, the regex object represents only a compiled pattern.
+					</p>
+				</li>
+				<li>
+					<p>
+						A low-level set of "atomic" operations.
+						When using these functions, the regex object does not only represent a compiled pattern - it also
+						encapsulates the state of the matching engine:
+					</p>
+					<ul>
+						<li>
+							The target text that the pattern is currently being matched against (<tt>text</tt>).
+						</li>
+						<li>
+							The details of the most recent match (<tt>groupcount</tt>, <tt>value</tt>, <tt>range</tt>).
+						</li>
+					</ul>
+					<p>
+						The low-level matching operations themselves (<tt>matches</tt>, <tt>lookingat</tt>, <tt>find</tt>)
+						only test for a single match at a time, and only return <tt class='code'>true</tt> or <tt class='code'>false</tt>
+						to say whether they succeeded.
+					</p>
+					<p>
+						These functions are marked as <b>bold</b> in the function list below:
+					</p>
+				</li>
+			</ol>
+			<ul>
+				<li><a href="#icu.regex.compile">icu.regex.compile</a></li>
+				<li><a href="#icu.regex.match">icu.regex.match</a></li>
+				<li><a href="#icu.regex.gmatch">icu.regex.gmatch</a></li>
+				<li><a href="#icu.regex.replace">icu.regex.replace</a></li>
+				<li><a href="#icu.regex.split">icu.regex.split</a></li>
+				<li><a href="#icu.regex.escape">icu.regex.escape</a></li>
+				<li><a href="#icu.regex.decompile">icu.regex.decompile</a></li>
+				<li><a href="#icu.regex.text"><b>icu.regex.text</b></a></li>
+				<li><a href="#icu.regex.bounds"><b>icu.regex.bounds</b></a></li>
+				<li><a href="#icu.regex.transparentbounds"><b>icu.regex.transparentbounds</b></a></li>
+				<li><a href="#icu.regex.anchoringbounds"><b>icu.regex.anchoringbounds</b></a></li>
+				<li><a href="#icu.regex.matches"><b>icu.regex.matches</b></a></li>
+				<li><a href="#icu.regex.lookingat"><b>icu.regex.lookingat</b></a></li>
+				<li><a href="#icu.regex.find"><b>icu.regex.find</b></a></li>
+				<li><a href="#icu.regex.groupcount"><b>icu.regex.groupcount</b></a></li>
+				<li><a href="#icu.regex.value"><b>icu.regex.value</b></a></li>
+				<li><a href="#icu.regex.range"><b>icu.regex.range</b></a></li>
+				<li><a href="#icu.regex.reset"><b>icu.regex.reset</b></a></li>
+				<li><a href="#icu.regex.clone"><b>icu.regex.clone</b></a></li>
+			</ul>
+		</div>
+		<hr />
+		<div id="icu.regex.compile">
+			<h3>icu.regex.compile (pattern[, flags])</h3>
+			<p>
+				Creates a new compiled regex pattern object. 
+				<b>pattern</b> can be a ustring or a Lua string. If a Lua string, it is expected to be encoded in the default codepage.
+			</p>
+			<p>
+				<b>flags</b> can be one of two things:
+			</p>
+			<ol>
+				<li>
+					A Lua string containing one or more of the following letters:
+					<ul>
+						<li>
+							'<tt class='code'>i</tt>'
+							-
+							Case-insensitive matching.
+						</li>
+						<li>
+							'<tt class='code'>x</tt>'
+							-
+							Comments mode. Whitespace and comments (the rest of the line after <tt class='code'>#</tt> and the character itself)
+							are ignored.
+						</li>
+						<li>
+							'<tt class='code'>s</tt>'
+							-
+							With this flag enabled the <tt class='code'>.</tt> character will successfully match on a new-line.
+							By default, it will not.
+						</li>
+						<li>
+							'<tt class='code'>m</tt>'
+							-
+							Multiline mode. The anchors <tt class='code'>^</tt> and <tt class='code'>$</tt> will
+							match at the beginning and end of each line, rather than just the beginning and end of the entire target text.
+						</li>
+						<li>
+							'<tt class='code'>w</tt>'
+							-
+							Affects the behaviour of <tt class='code'>\b</tt> by redefining word boundaries according
+							to the definitions of word in <a class='external' href='http://unicode.org/reports/tr29/#Word_Boundaries'>Unicode UAX 29</a>.
+						</li>
+					</ul>
+				</li>
+				<li>
+					A combination of the following constant values.
+					Combine them with the <tt class='code'>+</tt> operator.
+					<ul>
+						<li>
+							<tt>icu.regex.CASE_INSENSITIVE</tt>
+							-
+							Case-insensitive matching.
+						</li>
+						<li>
+							<tt>icu.regex.COMMENTS</tt>
+							-
+							Comments mode. Whitespace and comments (the rest of the line after <tt class='code'>#</tt> and the character itself)
+							are ignored.
+						</li>
+						<li>
+							<tt>icu.regex.DOTALL</tt>
+							-
+							With this flag enabled the <tt class='code'>.</tt> character will successfully match on a new-line.
+							By default, it will not.
+						</li>
+						<li>
+							<tt>icu.regex.LITERAL</tt>
+							-
+							Treat all special characters in the pattern as if they had no special meaning.
+							(At the time of writing, this flag seems to be failing in ICU 4.2.
+							As an alternative, you can use <a href='#icu.regex.escape'>icu.regex.escape</a> on the pattern before passing it.)
+						</li>
+						<li>
+							<tt>icu.regex.MULTILINE</tt>
+							-
+							Multiline mode. The anchors <tt class='code'>^</tt> and <tt class='code'>$</tt> will
+							match at the beginning and end of each line, rather than just the beginning and end of the entire target text.
+						</li>
+						<li>
+							<tt>icu.regex.UNIX_LINES</tt>
+							-
+							Multiline mode. The anchors <tt class='code'>^</tt> and <tt class='code'>$</tt> will
+							match at the beginning and end of each line, rather than just the beginning and end of the entire target text.
+						</li>
+						<li>
+							<tt>icu.regex.UWORD</tt>
+							-
+							Affects the behaviour of <tt class='code'>\b</tt> by redefining word boundaries according
+							to the definitions of word in <a class='external' href='http://unicode.org/reports/tr29/#Word_Boundaries'>Unicode UAX 29</a>.
+						</li>
+					</ul>
+				</li>
+			</ol>
+			<p>
+				<span class='note'>Note: </span>
+				You can also call icu.regex(...) as an alternative to icu.regex.compile(...)
+			</p>
+		</div>
+		<hr/>
+		<div id="icu.regex.match">
+			<h3>icu.regex.match (regex, text[, start_index])</h3>
+			<p>
+				Find the first match, or <tt class='code'>false</tt> if there is no match to be found, optionally
+				starting the search at the given <b>start_index</b> (one-based).
+			</p>
+			<p>
+				For a successful result the returned value is a match object that contains these named fields:
+			</p>
+			<ul>
+				<li><tt>value</tt>: The matching substring, as a ustring</li>
+				<li><tt>start</tt>, <tt>stop</tt>: Substring indices in the target text (one-based, inclusive)</li>
+			</ul>
+			<p>
+			The match object will also have an array component 1 to <i>n</i>, where <i>n</i> is the
+			  number of captures in the pattern. These entries will each be either the
+			  boolean value <tt class='code'>false</tt> (if the capture is an optional one and was not used)
+			  or an object with the same named fields as the parent match object as described above. The
+			  0th element of the match object will always be the match object itself.
+			</p>
+		</div>
+		<hr/>
+		<div id="icu.regex.gmatch">
+			<h3>icu.regex.gmatch (regex, text)</h3>
+			<p>
+				Returns an iterator over all of the matches found for a compiled regular
+				  expression, designed to be used in a <tt class='code'>for</tt> loop, e.g.:
+			</p>
+			<pre class='code'>
+for match in icu.regex.gmatch(myRegex, inputText) do
+    -- the "match" object is the same as described in the documentation for <a href='#icu.regex.match'>icu.regex.match</a>
+end</pre>
+		</div>
+		<hr />
+		<div id="icu.regex.replace">
+			<h3>icu.regex.replace (regex, text, replacement)</h3>
+			<p>
+				Find all places where the given regular expression matches in <b>text</b>,
+	  replace them with a new value, and return the result.
+			</p>
+			<p><b>text</b> must be a ustring, and <b>replacement</b> must be one of the following:</p>
+			<ul>
+				<li>
+					A ustring. You can use <tt class='code'>$0</tt>, <tt class='code'>$1</tt>, <tt class='code'>$2</tt> etc.
+					to use captured substrings from
+					the match.
+					A <tt class='code'>$</tt> followed by any other character will be replaced with that second character -
+					use <tt class='code'>$$</tt> to include a literal dollar sign.
+				</li>
+				<li>
+					A table. It will be indexed with the entire matching substring (as a
+					ustring), and the value found must be either a new ustring or <tt class='code'>nil</tt>/<tt class='code'>false</tt>,
+					in which case the original value will be retained.
+				</li>
+				<li>
+					A function. It will be called with a single parameter - a match object
+					as described in the documentation for <a href='#icu.regex.match'>icu.regex.match()</a>. It must
+					return either a new ustring to replace the match with or <tt class='code'>nil</tt>/<tt class='code'>false</tt> to keep
+					the original value.
+				</li>
+			</ul>
+		</div>
+		<hr/>
+		<div id="icu.regex.split">
+			<h3>icu.regex.split (regex, text[, maximum])</h3>
+			<p>
+				Returns an array of the substrings found by splitting ustring <b>text</b>  using the given <b>regex</b>, with an optional <b>maximum</b> number of
+				  splits.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.regex.isregex">
+			<h3>icu.regex.isregex (v)</h3>
+			<p>Returns <tt class='code'>true</tt> if the value <b>v</b> is a regex object,
+			<tt class='code'>false</tt> otherwise.
+		</div>
+		<hr />
+		<div id="icu.regex.escape">
+			<h3>icu.regex.escape (s)</h3>
+			<p>
+				Returns a copy of <b>s</b> (which must be either a ustring or a Lua string) with
+				  all "special" regex characters (like <tt class='code'>.</tt>, <tt class='code'>^</tt>, <tt class='code'>$</tt> etc.) prepended with a
+				  backslash.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.regex.decompile">
+			<h3>icu.regex.decompile (regex)</h3>
+			<p>
+				Returns two values - the original pattern of the regex as a ustring, and the flags that it was compiled with, as a number.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.regex.clone">
+			<h3>icu.regex.clone (regex)</h3>
+			<p>
+				Create a clone of <b>regex</b>. It only clones the compiled pattern, and not any stateful matching information like the target text.
+				It is like a faster, more efficient alternative to
+				<tt class='code'><a href='#icu.regex.compile'>icu.regex.compile</a>(<a href='#icu.regex.decompile'>icu.regex.decompile</a>(regex))</tt>.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.regex.text">
+			<h3>icu.regex.text (regex[, new_value])</h3>
+			<p>
+				Get or set the target text.
+				If a <b>new_value</b> is passed (which must be a ustring) it is set, and the function returns the regex object.
+				If there is no <b>new_value</b> passed, the current text is returned (which might be <tt class='code'>nil</tt> if it was never set).
+			</p>
+		</div>
+		<hr />
+		<div id="icu.regex.bounds">
+			<h3>icu.regex.bounds (regex[, new_start, new_stop])</h3>
+			<p>
+				Get or set the <i>region bounds</i> on the target text.
+				This is a pair of indices that describe where matching should start and stop in an atomic matching operation (unless they are overridden
+				by supplying a start index).
+			</p>
+			<p>
+				The target text must have been specified using <a href='#icu.regex.text'>icu.regex.text</a> before calling this function.
+				If <b>new_start</b> and <b>new_stop</b> are specified, they are set as the new region.
+				If not, the current bounds are returned.
+				The indices are one-based and inclusive.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.regex.transparentbounds">
+			<h3>icu.regex.transparentbounds (regex[, enable])</h3>
+			<p>
+				Get or set whether to use <i>transparent bounds</i>.
+				If <b>enable</b> is specified (it must be a boolean value), this is used to set the property, and the regex object is returned.
+				If not, the current setting is returned as a boolean value.
+			</p>
+			<p>
+				Transparent bounds alter the behaviour of "lookahead" and "lookbehind" captures when the region bounds have been set
+				(see <a href='#icu.regex.bounds'>icu.regex.bounds</a>). If the bounds are "transparent", this means that these captures
+				can "look" past the bounds.
+			</p>
+			<p>
+				By default, transparent bounds are disabled.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.regex.anchoringbounds">
+			<h3>icu.regex.anchoringbounds (regex[, enable])</h3>
+			<p>
+				Get or set whether to use <i>anchoring bounds</i>.
+				If <b>enable</b> is specified (it must be a boolean value), this is used to set the property, and the regex object is returned.
+				If not, the current setting is returned as a boolean value.
+			</p>
+			<p>
+				Anchoring bounds alter the behaviour of the <tt class='code'>^</tt> and <tt class='code'>$</tt> anchors.
+				If enabled, the anchors will match at the start and end of the region bounds, wherever they are in the target text.
+				If disabled, they will only match at the start and end of the entire text (or each line, if the relevant flag has been set).
+			</p>
+			<p>
+				By default, anchoring bounds are enabled.
+			</p>
+		</div>
+		<hr/>
+		<div id="icu.regex.matches">
+			<h3>icu.regex.matches (regex[, start_index])</h3>
+			<p>
+				Atomic match operation that attempts to match the entire matchable region of the target text
+				(which must have been previously set using <a href='#icu.regex.text'>icu.regex.text</a>)
+				against the whole regex pattern from beginning to end (regardless of anchors in the pattern).
+			</p>
+			<p>
+				This function will only return <tt class='code'>true</tt> or <tt class='code'>false</tt> to indicate whether the match was successful.
+				Use <a href='#icu.regex.groupcount'>icu.regex.groupcount</a>, <a href='#icu.regex.value'>icu.regex.value</a>
+				and <a href='#icu.regex.range'>icu.regex.range</a> to extract information about the "current" successful match.
+			</p>
+			<p>
+				If <b>start_index</b> is specified then the matchable region is from this index (one-based) to the end of the whole text, otherwise
+				the matching region will be the one specified by <a href='#icu.regex.bounds'>icu.regex.bounds</a> (by default the entire text).
+			</p>
+		</div>
+		<hr/>
+		<div id="icu.regex.lookingat">
+			<h3>icu.regex.lookingat (regex[, start_index])</h3>
+			<p>
+				Atomic match operation that attempts to match from the first character of the entire matchable region of the target text
+				(which must have been previously set using <a href='#icu.regex.text'>icu.regex.text</a>)
+				against the whole regex pattern from beginning to end.
+			</p>
+			<p>
+				This function will only return <tt class='code'>true</tt> or <tt class='code'>false</tt> to indicate whether the match was successful.
+				Use <a href='#icu.regex.groupcount'>icu.regex.groupcount</a>, <a href='#icu.regex.value'>icu.regex.value</a>
+				and <a href='#icu.regex.range'>icu.regex.range</a> to extract information about the "current" successful match.
+			</p>
+			<p>
+				If <b>start_index</b> is specified then the matchable region is from this index (one-based) to the end of the whole text, otherwise
+				the matching region will be the one specified by <a href='#icu.regex.bounds'>icu.regex.bounds</a> (by default the entire text).
+			</p>
+		</div>
+		<hr/>
+		<div id="icu.regex.find">
+			<h3>icu.regex.find (regex[, start_index])</h3>
+			<p>
+				If <tt>find</tt> has already been called at least once on this <b>regex</b> and successfully found a match, the next time it is called
+				it will start from after the previous match.
+				Attempts to match from the first character of the entire matchable region of the target text
+				(which must have been previously set using <a href='#icu.regex.text'>icu.regex.text</a>)
+				against the whole regex pattern from beginning to end.
+			</p>
+			<p>
+				This function will only return <tt class='code'>true</tt> or <tt class='code'>false</tt> to indicate whether the match was successful.
+				Use <a href='#icu.regex.groupcount'>icu.regex.groupcount</a>, <a href='#icu.regex.value'>icu.regex.value</a>
+				and <a href='#icu.regex.range'>icu.regex.range</a> to extract information about the "current" successful match.
+			</p>
+			<p>
+				If <b>start_index</b> is specified then the matchable region is from this index (one-based) to the end of the whole text, otherwise
+				the matching region will be the one specified by <a href='#icu.regex.bounds'>icu.regex.bounds</a> (by default the entire text).
+			</p>
+		</div>
+		<hr/>
+		<div id="icu.stringprep">
+			<h2>icu.stringprep</h2>
+			<ul>
+				<li><a href='#icu.stringprep.open'>icu.stringprep.open</a></li>
+				<li><a href='#icu.stringprep.openbytype'>icu.stringprep.openbytype</a></li>
+				<li><a href='#icu.stringprep.prepare'>icu.stringprep.prepare</a></li>
+			</ul>
+		</div>
+		<hr/>
+		<div id="icu.stringprep.open">
+			<h3>icu.stringprep.open (path, filename)</h3>
+			<p>
+				Open a StringPrep profile from a data file. <b>path</b> and <b>filename</b> must be Lua strings.
+				Returns the loaded profile object, or <tt class='code'>nil</tt> and an error message on failure.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.stringprep.openbytype">
+			<h3>icu.stringprep.openbytype (type)</h3>
+			<p>
+				Open a StringPrep profile from a predefined profile type. <b>type</b> can be one of:
+			</p>
+			<ul>
+				<li><tt>icu.stringprep.RFC3491_NAMEPREP</tt></li>
+				<li><tt>icu.stringprep.RFC3530_NFS4_CS_PREP</tt></li>
+				<li><tt>icu.stringprep.RFC3530_NFS4_CS_PREP_CI</tt></li>
+				<li><tt>icu.stringprep.RFC3530_NFS4_CIS_PREP</tt></li>
+				<li><tt>icu.stringprep.NFS4_MIXED_PREP_PREFIX</tt></li>
+				<li><tt>icu.stringprep.RFC3530_NFS4_MIXED_PREP_SUFFIX</tt></li>
+				<li><tt>icu.stringprep.RFC3722_ISCSI</tt></li>
+				<li><tt>icu.stringprep.RFC3920_NODEPREP</tt></li>
+				<li><tt>icu.stringprep.RFC3920_RESOURCEPREP</tt></li>
+				<li><tt>icu.stringprep.RFC4011_MIB</tt></li>
+				<li><tt>icu.stringprep.RFC4013_SASLPREP</tt></li>
+				<li><tt>icu.stringprep.RFC4505_TRACE</tt></li>
+				<li><tt>icu.stringprep.RFC4518_LDAP</tt></li>
+				<li><tt>icu.stringprep.RFC4518_LDAP_CI</tt></li>
+			</ul>
+		</div>
+		<hr />
+		<div id="icu.stringprep.prepare">
+			<h3>icu.stringprep.prepare (profile, ustr)</h3>
+			<p>
+				Prepare the given ustring <b>ustr</b> against the StringPrep profile, <b>profile</b>.
+				Returns a new ustring, or <tt class='code'>nil</tt> and an error message on failure.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.idna">
+			<h2>icu.idna</h2>
+			<ul>
+				<li><a href='#icu.idna.toascii'>icu.idna.toascii</a></li>
+				<li><a href='#icu.idna.tounicode'>icu.idna.tounicode</a></li>
+				<li><a href='#icu.idna.idntoascii'>icu.idna.idntoascii</a></li>
+				<li><a href='#icu.idna.idntounicode'>icu.idna.idntounicode</a></li>
+				<li><a href='#icu.idna.equals'>icu.idna.equals</a></li>
+				<li><a href='#icu.idna.lessthan'>icu.idna.lessthan</a></li>
+				<li><a href='#icu.idna.lessorequal'>icu.idna.lessorequal</a></li>
+			</ul>
+		</div>
+		<hr />
+		<div id="icu.idna.toascii">
+			<h3>icu.idna.toascii (label[, options])</h3>
+			<p>
+				Implementation of the ToASCII operation as defined in RFC 3490.
+				<b>label</b> is a ustring that holds a single label (e.g. "www", "lua" or "org") rather than a full domain name.
+				Returns either a new ustring or <tt class='code'>nil</tt> and an error.
+			</p>
+			<p><b>options</b>, if specified, should be some combination of these flags:</p>
+			<ul>
+				<li>
+					<tt>icu.idna.ALLOW_UNASSIGNED</tt>
+					<br/>
+					Do not return with an error if an unassigned codepoint is found.
+				</li>
+				<li>
+					<tt>icu.idna.USE_STD3_RULES</tt>
+					<br/>
+					Return with an error if the input breaks STD3 restrictions.
+				</li>
+			</ul>
+			<p>
+				Combine them with the <tt class='code'>+</tt> operator. The default is neither - i.e.
+				return with an error on unassigned codepoints, and do not check for STD3 violations.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.idna.tounicode">
+			<h3>icu.idna.tounicode (label[, options])</h3>
+			<p>
+				Implementation of the ToUnicode operation as defined in RFC 3490.
+				<b>label</b> is a ustring that holds a single label (e.g. "www", "lua" or "org") rather than a full domain name.
+			</p>
+			<p>
+				See <a href='#icu.idna.toascii'>icu.idna.toascii</a> for details on the flags for <b>options</b>.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.idna.idntoascii">
+			<h3>icu.idna.idntoascii (domain_name[, options])</h3>
+			<p>
+				Convenience function.
+				An equivalent to <a href='#icu.idna.toascii'>icu.idna.toascii</a>
+				that operates on a full <b>domain_name</b> (e.g. "www.lua.org") instead of individual labels.
+			</p>
+			<p>
+				See <a href='#icu.idna.toascii'>icu.idna.toascii</a> for details on the flags for <b>options</b>.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.idna.idntounicode">
+			<h3>icu.idna.idntounicode (domain_name[, options])</h3>
+			<p>
+				Convenience function.
+				An equivalent to <a href='#icu.idna.tounicode'>icu.idna.tounicode</a>
+				that operates on a full <b>domain_name</b> (e.g. "www.lua.org") instead of individual labels.
+			</p>
+			<p>
+				See <a href='#icu.idna.toascii'>icu.idna.toascii</a> for details on the flags for <b>options</b>.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.idna.equals">
+			<h3>icu.idna.equals (a, b)</h3>
+			<p>
+				Return <tt class='code'>true</tt> if ustrings <b>a</b> and <b>b</b> are equivalent as IDN strings, <tt class='code'>false</tt> otherwise.
+			</p>
+		</div>
+		<hr/>
+		<div id="icu.idna.lessthan">
+			<h3>icu.idna.lessthan (a, b)</h3>
+			<p>
+				Return <tt class='code'>true</tt> if ustring <b>a</b> is less than ustring <b>b</b> as IDN strings, <tt class='code'>false</tt> otherwise.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.idna.lessorequal">
+			<h3>icu.idna.lessorequal (a, b)</h3>
+			<p>
+				Return <tt class='code'>true</tt> if ustring <b>a</b> is less than or equal to ustring <b>b</b> as IDN strings, <tt class='code'>false</tt> otherwise.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.ufile">
+			<h2>icu.ufile</h2>
+			<ul>
+				<li><a href="#icu.ufile.open">icu.ufile.open</a></li>
+				<li><a href="#icu.ufile.encoding">icu.ufile.encoding</a></li>
+				<li><a href="#icu.ufile.locale">icu.ufile.locale</a></li>
+				<li><a href="#icu.ufile.read">icu.ufile.read</a></li>
+				<li><a href="#icu.ufile.write">icu.ufile.write</a></li>
+				<li><a href="#icu.ufile.lines">icu.ufile.lines</a></li>
+				<li><a href="#icu.ufile.rewind">icu.ufile.rewind</a></li>
+				<li><a href="#icu.ufile.flush">icu.ufile.flush</a></li>
+				<li><a href="#icu.ufile.close">icu.ufile.close</a></li>
+			</ul>
+		</div>
+		<hr />
+		<div id="icu.ufile.open">
+			<h3>icu.ufile.open (filepath, mode[, encoding[, locale]])</h3>
+			<p>
+				Open a file for reading/writing according to the <tt>mode</tt> parameter, which has the same meaning as the <tt>mode</tt> parameter of
+				<tt>io.open()</tt> except that the "<tt>b</tt>" binary mode qualifier has no meaning and should not be used. The encoding and locale to
+				use will be the current defaults if not supplied as parameters.
+			</p>
+			<p>
+				Returns a new ufile object. (The rest of the <tt>icu.ufile</tt> functions can also be called as methods on this object.)
+			</p>
+		</div>
+		<hr />
+		<div id="icu.ufile.encoding">
+			<h3>icu.ufile.encoding (ufile[, new_encoding])</h3>
+			<p>
+				Set the encoding to use if <tt>new_encoding</tt> is specified, otherwise return the current encoding.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.ufile.locale">
+			<h3>icu.ufile.locale (ufile[, new_locale])</h3>
+			<p>
+				Set the locale to use if <tt>new_locale</tt> is specified, otherwise return the current locale.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.ufile.read">
+			<h3>icu.ufile.read (ufile, ...)</h3>
+			<p>
+				The equivalent to <tt>file:read(...)</tt> on a standard Lua file, with the same options available:
+			</p>
+			<ul>
+				<li><i>(number)</i> - read a ustring of the given number of characters</li>
+				<li><tt>'*l'</tt> - read up to the next new-line character or end of the file (the default if no additional parameters are specified)</li>
+				<li><tt>'*n'</tt> - read a number from the file</li>
+				<li><tt>'*a'</tt> - read the whole file</li>
+			</ul>
+		</div>
+		<hr />
+		<div id="icu.ufile.write">
+			<h3>icu.ufile.write (ufile, ...)</h3>
+			<p>
+				The equivalent to <tt>file:write(...)</tt> on a standard Lua file, except that the values to write must all be ustrings.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.ufile.lines">
+			<h3>icu.ufile.lines (ufile)</h3>
+			<p>
+				Create a for-loop iterator over lines of text from the given ufile, equivalent to <tt>file:lines()</tt>.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.ufile.rewind">
+			<h3>icu.ufile.rewind (ufile)</h3>
+			<p>
+				Unlike standard Lua files which allow full seeking operations, ufiles can only have the cursor position returned to the beginning of the
+				file by calling this function.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.ufile.flush">
+			<h3>icu.ufile.flush (ufile)</h3>
+			<p>
+				Save any written data to the <tt>ufile</tt>.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.ufile.close">
+			<h3>icu.ufile.close (ufile)</h3>
+			<p>
+				Close the ufile. This will also occur automatically if the ufile object is garbage collected.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.normalizer">
+			<h3>icu.normalizer</h3>
+			<ul>
+				<li><a href="#icu.normalizer.normalize">icu.normalizer.normalize</a></li>
+				<li><a href="#icu.normalizer.quickcheck">icu.normalizer.quickcheck</a></li>
+				<li><a href="#icu.normalizer.isnormalized">icu.normalizer.isnormalized</a></li>
+				<li><a href="#icu.normalizer.concat">icu.normalizer.concat</a></li>
+				<li><a href="#icu.normalizer.equals">icu.normalizer.equals</a></li>
+				<li><a href="#icu.normalizer.lessthan">icu.normalizer.lessthan</a></li>
+				<li><a href="#icu.normalizer.lessorequal">icu.normalizer.lessorequal</a></li>
+			</ul>
+		</div>
+		<hr />
+		<div id="icu.normalizer.normalize">
+			<h3>icu.normalizer.normalize (ustr[, mode])</h3>
+			<p>
+				Return a normalized version of ustring <b>ustr</b>.
+				If specified, <b>mode</b> must be one of the following values, passed as a Lua string:
+			</p>
+			<ul>
+				<li><tt class='code'>'nfc'</tt> (Canonical decomposition followed by canonical composition - the default if no mode is specified)</li>
+				<li><tt class='code'>'nfd'</tt> (Canonical decomposition)</li>
+				<li><tt class='code'>'nfkc'</tt> (Compatibility decomposition followed by canonical composition)</li>
+				<li><tt class='code'>'nfkd'</tt> (Compatibility decomposition)</li>
+				<li><tt class='code'>'fcd'</tt> ("Fast C or D" form)</li>
+				<li><tt class='code'>'none'</tt> (No decomposition or composition)</li>
+			</ul>
+		</div>
+		<hr />
+		<div id="icu.normalizer.quickcheck">
+			<h3>icu.normalizer.quickcheck (ustr[, mode])</h3>
+			<p>
+				Attempt to perform a quick check to determine whether ustring <b>ustr</b> is already normalized in the given <b>mode</b> (or the same
+				default as <a href="#icu.normalizer.normalize"><tt>icu.normalizer.normalize</tt></a>).
+				<i>This function will not return a
+				boolean</i> as it has three possible states to return, which are the Lua strings <tt class='code'>'yes'</tt>, <tt class='code'>'no'</tt>
+				and <tt class='code'>'maybe'</tt> (when it cannot be determined by a quick check).
+			</p>
+		</div>
+		<hr />
+		<div id="icu.normalizer.isnormalized">
+			<h3>icu.normalizer.isnormalized (ustr[, mode])</h3>
+			<p>
+				Perform a full normalization check on <b>ustr</b>, and return a definite <tt class='code'>true</tt> or <tt class='code'>false</tt>.
+			</p>
+		</div>
+		<hr />
+		<div id="icu.normalizer.concat">
+			<h3>icu.normalizer.concat (ustr_1, ustr_2[, mode])</h3>
+			<p>
+				Where you have two ustrings that are <i>already known</i> to be normalized, and you want to concatenate them, the result may not be
+				normalized. Re-normalizing the entire new string can be inefficient, especially compared to using this function which will normalize only
+				where the two strings join.
+			</p>
+		</div>
+		<hr />
+		<div>
+			<h3 id="icu.normalizer.equals">icu.normalizer.equals (ustr_1, ustr_2)</h3>
+			<h3 id="icu.normalizer.equals">icu.normalizer.lessthan (ustr_1, ustr_2)</h3>
+			<h3 id="icu.normalizer.equals">icu.normalizer.lessorequal (ustr_1, ustr_2)</h3>
+			<p>
+				When you want to compare two ustrings which have not been normalized but you want to compare them as if they had been, these functions can
+				be a more efficient way than normalizing and then comparing them.
+			</p>
+		</div>
+	</body>
+</html>

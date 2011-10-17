@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual C++ Express 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ICU4Lua", "ICU4Lua.vcproj", "{64B0483F-0E87-45B6-BC4C-5BA19012B621}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{64B0483F-0E87-45B6-BC4C-5BA19012B621}.Debug|Win32.ActiveCfg = Debug|Win32
+		{64B0483F-0E87-45B6-BC4C-5BA19012B621}.Debug|Win32.Build.0 = Debug|Win32
+		{64B0483F-0E87-45B6-BC4C-5BA19012B621}.Release|Win32.ActiveCfg = Release|Win32
+		{64B0483F-0E87-45B6-BC4C-5BA19012B621}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

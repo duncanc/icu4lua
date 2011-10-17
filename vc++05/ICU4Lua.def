@@ -1,0 +1,10 @@
+EXPORTS
+	luaopen_icu
+	luaopen_icu_ustring
+	luaopen_icu_utf8
+	luaopen_icu_collator
+	luaopen_icu_regex
+	luaopen_icu_stringprep
+	luaopen_icu_idna
+	luaopen_icu_ufile
+	luaopen_icu_normalizer

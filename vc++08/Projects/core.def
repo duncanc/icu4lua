@@ -1,0 +1,3 @@
+EXPORTS
+	luaopen_icu
+	luaopen_icu_ustring
