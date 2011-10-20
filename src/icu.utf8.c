@@ -270,6 +270,7 @@ static int icu_utf8_codepoint(lua_State *L) {
         if (ch == U_SENTINEL) {
             break;
         }
+        luaL_checkstack(L,1,"error growing the stack");
         lua_pushinteger(L,ch);
     }
     return lua_gettop(L)-1;
